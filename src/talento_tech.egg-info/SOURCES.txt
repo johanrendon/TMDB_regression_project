@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+src/__init__.py
+src/clean_dataset.py
+src/ingest_data.py
+src/analysis/__init__.py
+src/analysis/basic_inspection.py
+src/analysis/univariate_analysis.py
+src/talento_tech.egg-info/PKG-INFO
+src/talento_tech.egg-info/SOURCES.txt
+src/talento_tech.egg-info/dependency_links.txt
+src/talento_tech.egg-info/top_level.txt

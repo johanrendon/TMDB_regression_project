@@ -18,15 +18,15 @@ class ZipDataIngestor(DataIngestor):
             raise ValueError("El archivo no es un .zip")
 
         with zipfile.ZipFile(file_path, "r") as zip_ref:
-            zip_ref.extractall("./data/raw")
+            zip_ref.extractall("../data/raw")
 
-        extracted_files = os.listdir("./data/raw")
+        extracted_files = os.listdir("../data/raw")
         csv_files = [f for f in extracted_files if f.endswith(".csv")]
 
         if len(csv_files) == 0:
             raise FileNotFoundError("No hay archivos csv en los archivos extraidos")
 
-        csv_file_path = os.path.join("extracted_data", csv_files[0])
+        csv_file_path = os.path.join("../data/raw/", csv_files[0])
         df = pd.read_csv(csv_file_path)
 
         return df
