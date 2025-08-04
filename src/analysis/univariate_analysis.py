@@ -59,7 +59,9 @@ class NumericalUnivariate(UnivariateAnalysisStrategy):
 
 
 class CategoricalUnivariate(UnivariateAnalysisStrategy):
-    def analyze(self, df: pd.DataFrame, feature: str):
+    def analyze(
+        self, df: pd.DataFrame, feature: str, box: bool = False, log: bool = False
+    ):
         """
         Grafica la distribución de una variable categórica usando un barplot.
 
@@ -89,6 +91,6 @@ class UnivariateAnalyzer:
         self._strategy = strategy
 
     def execute_analysis(
-        self, df: pd.DataFrame, feature: str, box: bool = True, log: bool = False
+        self, df: pd.DataFrame, feature: str, box: bool = False, log: bool = False
     ):
         self._strategy.analyze(df, feature, box=box, log=log)
