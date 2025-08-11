@@ -1,83 +1,82 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 
 import pandas as pd
 
 
 class DataInspectionStrategy(ABC):
     @abstractmethod
-    def inspect(self, df: pd.DataFrame):
-        """
-        Realiza una determinada inspección.
+    def inspect(self, df: pd.DataFrame) -> None:
+        """Perform a specific type of inspection.
 
-        Parametros:
-        df (pd.DataFrame): Dataframe a inspeccionar.
+        Args:
+            df (pd.DataFrame): DataFrame to inspect.
 
         Returns:
-        None: Este método imprime los resultados de la inspección directamente.
-
+            None: Prints the inspection results directly.
         """
         pass
 
 
 class DataTypesInspection(DataInspectionStrategy):
-    def inspect(self, df: pd.DataFrame):
-        """
-        Inspecciona los tipos de datos y los valores nulos en el dataframe
+    def inspect(self, df: pd.DataFrame) -> None:
+        """Inspect the data types and null values in the DataFrame.
 
-        Parametros:
-        df (pd.DataFrame): DataFrame a inspeccionar.
+        Args:
+            df (pd.DataFrame): DataFrame to inspect.
 
         Returns:
-        None: Imprime los tipos de datos y los valores nulos.
+            None: Prints data types and null values.
         """
-
-        print("Tipos de datos y valores nulos:")
+        print("Data types and null values:")
         print(df.info())
 
 
 class SummaryStatistics(DataInspectionStrategy):
     def inspect(self, df: pd.DataFrame) -> None:
-        """
-        Imprime las estadísticas numéricas y categóricas.
+        """Print numerical and categorical statistics.
 
-        Parametros:
-        df (pd.DataFrame): DataFrame a inspeccionar.
+        Args:
+            df (pd.DataFrame): DataFrame to inspect.
 
         Returns:
-        None: Imprime las estadísticas en la consola.
+            None: Prints descriptive statistics for numerical and
+            categorical features.
         """
-
-        print("Estadísitcas (Numerical Features):")
+        print("Statistics (Numerical Features):")
         print(df.describe())
-        print("Estadísitcas (Categorical Features):")
+        print("Statistics (Categorical Features):")
         print(df.describe(include="O"))
 
 
 class DataInspector:
     def __init__(self, strategy: DataInspectionStrategy) -> None:
-        self._strategy = strategy
+        """Initialize the DataInspector with a given strategy.
 
-    def set_strategy(self, strategy: DataInspectionStrategy):
+        Args:
+            strategy (DataInspectionStrategy): The strategy to use for
+            data inspection.
         """
-        Establece la estrategia a utilizar.
+        self._strategy: DataInspectionStrategy = strategy
 
-        Parametros:
-        strategy (DataInspectionStrategy): La nueva estrategia a usar para la inspección de los datos.
+    def set_strategy(self, strategy: DataInspectionStrategy) -> None:
+        """Set the strategy to use for data inspection.
+
+        Args:
+            strategy (DataInspectionStrategy): The new strategy to use.
 
         Returns:
-        None
+            None
         """
         self._strategy = strategy
 
-    def execute_inspection(self, df: pd.DataFrame):
-        """
-        Ejecuta la inspección usando la estrategia actual.
+    def execute_inspection(self, df: pd.DataFrame) -> None:
+        """Execute the inspection using the current strategy.
 
-        Parametros:
-        df (pd.DataFrame): Dataframe a inspeccionar.
+        Args:
+            df (pd.DataFrame): DataFrame to inspect.
 
         Returns:
-        None
+            None
         """
-
         self._strategy.inspect(df)

@@ -1,17 +1,20 @@
-from os import name
 from typing import List
 
-import numpy as np
 import pandas as pd
 
 original_df: pd.DataFrame = pd.read_csv("./data/raw/TMDB_movie_dataset_v11.csv")
 
 
 def rvote_average(dataframe: pd.DataFrame) -> pd.DataFrame:
-    """
-    Conserva solo los valores de los votos que son mayores a 0
-    """
+    """Filter movies with vote_average and vote_count greater than zero.
 
+    Args:
+        dataframe (pd.DataFrame): The input DataFrame.
+
+    Returns:
+        pd.DataFrame: Filtered DataFrame containing only rows with positive
+        vote_average and vote_count.
+    """
     df = (
         dataframe[(dataframe["vote_average"] > 0) & (dataframe["vote_count"] > 0)]
         .reset_index(drop=True)
@@ -21,6 +24,14 @@ def rvote_average(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 def drop_columns(dataframe: pd.DataFrame) -> pd.DataFrame:
+    """Remove unnecessary columns from the DataFrame.
+
+    Args:
+        dataframe (pd.DataFrame): The input DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame without the specified columns.
+    """
     columns_to_drop: List[str] = [
         "backdrop_path",
         "keywords",
@@ -32,16 +43,19 @@ def drop_columns(dataframe: pd.DataFrame) -> pd.DataFrame:
         "homepage",
         "status",
     ]
-    df_clean = dataframe.drop(columns=columns_to_drop, axis=1)
-
-    return df_clean
+    return dataframe.drop(columns=columns_to_drop, axis=1)
 
 
 def rbudget_revenue(dataframe: pd.DataFrame) -> pd.DataFrame:
-    """
-    Conserva solo los valores de el budget y revenue que son mayores a 0
-    """
+    """Filter movies with budget and revenue greater than zero.
 
+    Args:
+        dataframe (pd.DataFrame): The input DataFrame.
+
+    Returns:
+        pd.DataFrame: Filtered DataFrame containing only rows with positive
+        budget and revenue.
+    """
     df = (
         dataframe[(dataframe["budget"] > 0) & (dataframe["revenue"] > 0)]
         .reset_index(drop=True)

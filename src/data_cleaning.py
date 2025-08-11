@@ -10,34 +10,31 @@ logging.basicConfig(
 
 
 def save_data(name: str, df: pd.DataFrame) -> pd.DataFrame:
-    """Guarda un DataFrame en un archivo CSV en un directorio predefinido.
+    """Save a DataFrame to a CSV file in a predefined directory.
 
-    La función construye una ruta dentro del directorio 'data/interm/', se asegura
-    de que este directorio exista, y luego guarda el DataFrame proporcionado.
+    The function builds a path inside the 'data/interm/' directory,
+    ensures the directory exists, and then saves the provided DataFrame.
 
     Args:
-        name (str): El nombre base para el archivo de salida (sin la extensión .csv).
-        df (pd.DataFrame): El DataFrame que se va a guardar.
+        name (str): The base name for the output file (without the .csv extension).
+        df (pd.DataFrame): The DataFrame to save.
 
     Returns:
-        pd.DataFrame: El mismo DataFrame que se pasó como entrada, permitiendo
-            el encadenamiento de métodos si fuera necesario.
+        pd.DataFrame: The same DataFrame passed as input, allowing method chaining if needed.
     """
     output_path = Path("data/interm/") / f"{name}.csv"
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    logging.info(f"Guardando DataFrame en: {output_path}")
+    logging.info(f"Saving DataFrame to: {output_path}")
     df.to_csv(output_path, index=False)
     return df
 
 
 class CleanHandler:
-    """
-    Una clase contenedora para métodos de limpieza de datos en DataFrames.
+    """A container class for data cleaning methods on DataFrames.
 
-    Esta clase agrupa funcionalidades estáticas relacionadas con la preparación
-    y limpieza de conjuntos de datos.
+    This class groups static functionalities related to dataset preparation and cleaning.
     """
 
     @staticmethod
@@ -50,37 +47,35 @@ class CleanHandler:
         save: bool = False,
         name: str = "",
     ) -> pd.DataFrame:
-        """Limpia los valores faltantes de un DataFrame utilizando varios métodos.
+        """Clean missing values in a DataFrame using various methods.
 
-        Esta función toma un DataFrame y aplica una estrategia para manejar los
-        valores NaN. Puede rellenarlos (imputar) con la media, mediana, moda o
-        un valor constante, o puede eliminar las filas/columnas que los contengan.
+        This function takes a DataFrame and applies a strategy to handle NaN values.
+        It can fill (impute) them using mean, median, mode, or a constant value,
+        or remove the rows/columns containing them.
 
         Args:
-            df (pd.DataFrame): El DataFrame de entrada que contiene los datos a limpiar.
-            method (str, optional): El método a utilizar. Los valores válidos son:
-                'mean', 'median', 'mode', 'constant', 'drop'. Por defecto es "mean".
-            fill_value (Union[str, int, float], optional): El valor a utilizar cuando
-                el método es 'constant'. Por defecto es None.
-            axis (int, optional): El eje para el método 'drop'. 0 para filas, 1 para
-                columnas. Por defecto es 0.
-            thresh (int, optional): Para el método 'drop', es el número mínimo de
-                valores no nulos requeridos para no ser eliminado. Por defecto es None.
-            save (bool, optional): Si es True, guarda el DataFrame limpio en un
-                archivo CSV. Por defecto es False.
-            name (str, optional): El nombre del archivo (sin extensión) si save es True.
-                Es obligatorio si `save` es True. Por defecto es "".
+            df (pd.DataFrame): The input DataFrame containing data to clean.
+            method (str, optional): The method to use. Valid values are:
+                'mean', 'median', 'mode', 'constant', 'drop'. Defaults to "mean".
+            fill_value (Union[str, int, float], optional): The value to use when
+                the method is 'constant'. Defaults to None.
+            axis (int, optional): Axis for the 'drop' method. 0 for rows, 1 for columns.
+                Defaults to 0.
+            thresh (int, optional): For the 'drop' method, the minimum number of
+                non-null values required to avoid removal. Defaults to None.
+            save (bool, optional): If True, saves the cleaned DataFrame to a CSV file.
+                Defaults to False.
+            name (str, optional): The file name (without extension) if `save` is True.
+                Required if `save` is True. Defaults to "".
 
         Returns:
-            pd.DataFrame: Un nuevo DataFrame con los valores faltantes tratados.
+            pd.DataFrame: A new DataFrame with missing values handled.
 
         Raises:
-            ValueError: Si `save` es True pero no se proporciona un `name`.
-            ValueError: Si `method` es 'constant' pero no se proporciona un `fill_value`.
+            ValueError: If `save` is True but `name` is not provided.
+            ValueError: If `method` is 'constant' but no `fill_value` is provided.
         """
-        logging.info(
-            f"Iniciando limpieza de valores faltantes con el método: '{method}'"
-        )
+        logging.info(f"Starting missing value cleaning with method: '{method}'")
 
         df_cleaned = df.copy()
 
@@ -88,7 +83,7 @@ class CleanHandler:
             numeric_columns = df_cleaned.select_dtypes(include="number").columns
             if numeric_columns.empty:
                 logging.warning(
-                    "No se encontraron columnas numéricas para imputar con media o mediana."
+                    "No numeric columns found to impute using mean or median."
                 )
             else:
                 if method == "mean":
@@ -108,7 +103,7 @@ class CleanHandler:
         elif method == "constant":
             if fill_value is None:
                 raise ValueError(
-                    "Se debe proveer un 'fill_value' para el método 'constant'."
+                    "A 'fill_value' must be provided for the 'constant' method."
                 )
             df_cleaned = df_cleaned.fillna(fill_value)
 
@@ -117,21 +112,21 @@ class CleanHandler:
             df_cleaned = df_cleaned.dropna(axis=axis, thresh=thresh)
             final_rows = len(df_cleaned)
             logging.info(
-                f"Se eliminaron {original_rows - final_rows} filas/columnas con valores nulos."
+                f"Removed {original_rows - final_rows} rows/columns with null values."
             )
 
         else:
             logging.warning(
-                f"Método desconocido '{method}'. No se manejaron los valores faltantes."
+                f"Unknown method '{method}'. Missing values were not handled."
             )
             return df_cleaned
 
-        logging.info("Proceso de limpieza de valores faltantes completado.")
+        logging.info("Missing value cleaning process completed.")
 
         if save:
             if not name:
                 raise ValueError(
-                    "El parámetro 'name' no puede estar vacío si 'save' es True."
+                    "The 'name' parameter cannot be empty if 'save' is True."
                 )
             return save_data(name, df_cleaned)
 
@@ -141,37 +136,35 @@ class CleanHandler:
     def select_features(
         df: pd.DataFrame, features: List[str], save: bool = False, name: str = ""
     ) -> pd.DataFrame:
-        """Selecciona un subconjunto de características (columnas) de un DataFrame.
+        """Select a subset of features (columns) from a DataFrame.
 
-        Esta función crea una copia del DataFrame que contiene únicamente las
-        columnas especificadas en la lista de características. Opcionalmente,
-        puede guardar el DataFrame resultante en un archivo CSV.
+        This function creates a copy of the DataFrame containing only the columns
+        specified in the features list. Optionally, it can save the resulting DataFrame
+        to a CSV file.
 
         Args:
-            df (pd.DataFrame): El DataFrame original del cual se seleccionarán
-                las características.
-            features (List[str]): Una lista de nombres de las columnas a seleccionar.
-            save (bool, optional): Si es True, guarda el DataFrame con las
-                características seleccionadas. Por defecto es False.
-            name (str, optional): El nombre del archivo (sin extensión) a guardar
-                si `save` es True. Es obligatorio en ese caso. Por defecto es "".
+            df (pd.DataFrame): The original DataFrame from which features will be selected.
+            features (List[str]): A list of column names to select.
+            save (bool, optional): If True, saves the DataFrame with selected features.
+                Defaults to False.
+            name (str, optional): The file name (without extension) to save if `save` is True.
+                Required if `save` is True. Defaults to "".
 
         Returns:
-            pd.DataFrame: Un nuevo DataFrame que contiene solo las columnas seleccionadas.
+            pd.DataFrame: A new DataFrame containing only the selected columns.
 
         Raises:
-            ValueError: Si `save` es True pero no se proporciona un `name`.
-            KeyError: Si alguna de las características en la lista `features`
-                no se encuentra en las columnas del DataFrame.
+            ValueError: If `save` is True but `name` is not provided.
+            KeyError: If any feature in the `features` list is not found in the DataFrame columns.
         """
-        logging.info(f"Seleccionando {len(features)} características: {features}")
+        logging.info(f"Selecting {len(features)} features: {features}")
 
-        df_selected = df[features].copy()
+        df_selected: pd.DataFrame = df[features].copy()
 
         if save:
             if not name:
                 raise ValueError(
-                    "El parámetro 'name' no puede estar vacío si 'save' es True."
+                    "The 'name' parameter cannot be empty if 'save' is True."
                 )
             return save_data(name, df_selected)
 

@@ -5,119 +5,106 @@ from typing import List, Optional
 
 import pandas as pd
 
-# Configuración básica de logging para ver los mensajes del proceso.
+# Basic logging configuration to display process messages.
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 
 class FeatureSelectionStrategy(ABC):
-    """
-    Clase base abstracta (ABC) que define la interfaz para las estrategias de selección.
+    """Abstract base class (ABC) defining the interface for feature selection strategies.
 
-    Actúa como un contrato que todas las estrategias concretas de selección de
-    características deben implementar. Esto asegura que el `FeatureSelectionHandler`
-    pueda trabajar con cualquier estrategia que siga esta interfaz.
+    Acts as a contract that all concrete feature selection strategies must implement.
+    This ensures that the `FeatureSelectionHandler` can work with any strategy
+    following this interface.
     """
 
     @abstractmethod
     def select(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
-        """
-        Método abstracto para seleccionar características de un DataFrame.
+        """Abstract method to select features from a DataFrame.
 
         Args:
-            df (pd.DataFrame): El DataFrame de entrada del cual se seleccionarán las
-                               características.
-            features (List[str]): La lista de características a considerar o utilizar
-                                  por la estrategia.
+            df (pd.DataFrame): The input DataFrame from which features will be selected.
+            features (List[str]): The list of features to consider or use in the strategy.
 
         Returns:
-            pd.DataFrame: Un nuevo DataFrame que contiene únicamente las
-                          características seleccionadas.
+            pd.DataFrame: A new DataFrame containing only the selected features.
         """
         pass
 
 
 class SelectFeatures(FeatureSelectionStrategy):
-    """
-    Una estrategia concreta que selecciona columnas basándose en una lista de nombres.
+    """Concrete strategy that selects columns based on a list of names.
 
-    Esta es una implementación simple del `FeatureSelectionStrategy` que toma
-    directamente las columnas especificadas en la lista `features`.
+    This is a simple implementation of `FeatureSelectionStrategy` that directly
+    selects the columns specified in the `features` list.
     """
 
     def select(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
-        """
-        Selecciona un subconjunto de columnas del DataFrame.
+        """Select a subset of columns from the DataFrame.
 
-        Crea una copia del DataFrame de entrada conteniendo únicamente las columnas
-        cuyos nombres se especifican en la lista `features`.
+        Creates a copy of the input DataFrame containing only the columns whose
+        names are specified in the `features` list.
 
         Args:
-            df (pd.DataFrame): El DataFrame de entrada.
-            features (List[str]): La lista de nombres de columnas a seleccionar.
+            df (pd.DataFrame): The input DataFrame.
+            features (List[str]): The list of column names to select.
 
         Returns:
-            pd.DataFrame: Una copia del DataFrame con las columnas seleccionadas.
+            pd.DataFrame: A copy of the DataFrame with the selected columns.
         """
-        logging.info(f"Seleccionando {len(features)} características: {features}")
+        logging.info(f"Selecting {len(features)} features: {features}")
         df_selected = df[features].copy()
         return df_selected
 
 
 class FeatureSelectionHandler:
-    """
-    Gestiona y ejecuta una estrategia de selección de características.
+    """Manages and executes a feature selection strategy.
 
-    Esta clase sigue el Patrón de Diseño Strategy. Mantiene una referencia a un
-    objeto de estrategia y delega la tarea de selección a dicho objeto. La estrategia
-    puede ser intercambiada dinámicamente en tiempo de ejecución.
+    This class follows the Strategy Design Pattern. It maintains a reference
+    to a strategy object and delegates the selection task to it. The strategy
+    can be dynamically changed at runtime.
 
     Attributes:
-        _strategy (FeatureSelectionStrategy): La estrategia de selección actual.
+        _strategy (FeatureSelectionStrategy): The current feature selection strategy.
     """
 
     def __init__(self, strategy: FeatureSelectionStrategy) -> None:
-        """
-        Inicializa el FeatureSelectionHandler con una estrategia inicial.
+        """Initialize the FeatureSelectionHandler with an initial strategy.
 
         Args:
-            strategy (FeatureSelectionStrategy): La estrategia de selección de
-                                                 características a utilizar.
+            strategy (FeatureSelectionStrategy): The feature selection strategy to use.
         """
         self._strategy = strategy
 
     def set_strategy(self, strategy: FeatureSelectionStrategy) -> None:
-        """
-        Permite cambiar la estrategia de selección en tiempo de ejecución.
+        """Change the feature selection strategy at runtime.
 
         Args:
-            strategy (FeatureSelectionStrategy): La nueva estrategia a establecer.
+            strategy (FeatureSelectionStrategy): The new strategy to set.
         """
-        logging.info(
-            f"Cambiando la estrategia de selección a: {type(strategy).__name__}"
-        )
+        logging.info(f"Changing selection strategy to: {type(strategy).__name__}")
         self._strategy = strategy
 
     def execute_selection(
         self, df: pd.DataFrame, features: List[str], save: bool = False, name: str = ""
     ) -> Optional[pd.DataFrame]:
-        """
-        Ejecuta el proceso de selección de características sobre un DataFrame.
+        """Execute the feature selection process on a DataFrame.
 
         Args:
-            df (pd.DataFrame): El DataFrame de entrada.
-            features (List[str]): La lista de características a considerar.
-            save (bool): Si es True, guarda el resultado en un CSV y no devuelve nada.
-                         Si es False, devuelve el DataFrame con las características seleccionadas.
-            name (str): El nombre del archivo si save es True.
+            df (pd.DataFrame): The input DataFrame.
+            features (List[str]): The list of features to consider.
+            save (bool, optional): If True, saves the result to a CSV and returns None.
+                                   If False, returns the DataFrame with selected features.
+                                   Defaults to False.
+            name (str, optional): The file name if `save` is True.
 
         Returns:
-            Optional[pd.DataFrame]: Un DataFrame con las características seleccionadas si save=False,
-                                    de lo contrario None.
+            Optional[pd.DataFrame]: The DataFrame with selected features if `save` is False,
+                                    otherwise None.
 
         Raises:
-            ValueError: Si `save` es True pero no se proporciona un `name` para el archivo.
+            ValueError: If `save` is True but no `name` is provided.
         """
         logging.info("Executing selection with strategy.")
 
@@ -126,14 +113,13 @@ class FeatureSelectionHandler:
         if save:
             if not name:
                 raise ValueError(
-                    "El parámetro 'name' no puede estar vacío si 'save' es True."
+                    "The 'name' parameter cannot be empty if 'save' is True."
                 )
 
             output_path = Path(f"../data/interm/{name}.csv")
-            # Asegurarse de que el directorio padre existe
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
-            logging.info(f"Guardando características seleccionadas en: {output_path}")
+            logging.info(f"Saving selected features to: {output_path}")
             features_selected.to_csv(output_path, index=False)
 
             return features_selected
