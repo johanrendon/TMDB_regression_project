@@ -11,7 +11,7 @@ logging.basicConfig(
 
 def save_data(name: str, df: pd.DataFrame) -> pd.DataFrame:
     """Save a DataFrame to a CSV file in a predefined directory."""
-    output_path = Path("data/interm/") / f"{name}.csv"
+    output_path = Path("../data/interm/") / f"{name}.csv"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     logging.info(f"Saving DataFrame to: {output_path}")
